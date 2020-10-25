@@ -1,0 +1,117 @@
+<!doctype html> 
+<html>
+<head>
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+<title>Hygiene Food Ratings</title>
+<h1>Food Hygiene Ratings</h1>
+<p>Welcome, in this page it shows ratings of restaurants based in Canterbury.</p>
+
+<script>
+$(document).ready(function()
+{
+    $.ajax({
+        type: "GET",
+        url: "https://www.cs.kent.ac.uk/people/staff/lb514/hygiene/hygiene.php",
+        dataType: "json",
+        success: function (data) {
+			var results = '';	
+			$.each(data, function() {
+				results += '<tr><td>' + 
+                this.business + '</td><td>'+ 
+                 this.address + '</td><td>' + 
+                 this.rating + '</td><td>' + 
+                 this.date + '</td><td><button onClick="getRating(\'' + 
+                 this.business + '\',\'' + this.postcode + '\')"> Rating</button></td></tr>';
+			});
+			$('#food-table').append(results);
+        },
+        error: function (error) {
+            alert(error.responseText);
+        }
+    });
+	
+	$.ajax({
+        type: "GET",
+        url: "https://www.cs.kent.ac.uk/people/staff/lb514/hygiene/hygiene.php?op=pages",
+        dataType: "json",
+        success: function (data) {
+			var pages = data.pages;
+			var buttonHTML = '';
+			for (i = 1; i < pages + 1; i++) { 
+				buttonHTML += '<button onClick="fetchPage(' + i + ')">' + i + '</button> ';}
+			$('#buttons').append(buttonHTML);
+        },
+        error: function (error) {
+            alert(error.responseText);
+        }
+    });
+})
+
+function nameSearch(name) {
+    $.ajax({
+        type: "GET",
+        url: "https://www.cs.kent.ac.uk/people/staff/lb514/hygiene/hygiene.php?op=searchname&name=" + name,
+        dataType: "json",
+        success: function (data) {
+            $("tbody tr").remove()
+            var results = '';
+            $.each(data, function() {
+                results += '<tr><td>' + 
+                this.business + '</td><td>' + 
+                this.address + '</td><td>' + 
+                this.rating + '</td><td>' + 
+                this.date + '</td><td><button onClick="getRating(\'' + this.business + '\',\'' + this.postcode + '\')"> Rating</button></td></tr>';
+            });
+            $('#food-table').append(results);
+        },
+        error: function (error) {
+            alert(error.responseText);
+        }
+    });
+}
+
+function fetchPage(page) {
+	$.ajax({
+        type: "GET",
+        url: "https://www.cs.kent.ac.uk/people/staff/lb514/hygiene/hygiene.php?op=retrieve&page=" + page,
+        dataType: "json",
+        success: function (data) {
+			$("tbody tr").remove()
+			var results = '';
+			$.each(data, function() {
+				results += '<tr><td>' + 
+                this.business + '</td><td>' + 
+                this.address + '</td><td>' + 
+                this.rating + '</td><td>' + 
+                this.date + '</td><td><button onClick="getRating(\'' + this.business + '\',\'' + this.postcode + '\')"> Rating</button></td></tr>';
+			});
+			$('#food-table').append(results);
+        },
+        error: function (error) {
+            alert(error.responseText);
+        }
+    });
+}
+
+</script>
+</head>
+<body>
+<div>
+  <div id="buttons"> Pages: </div>
+    Restaurant name:
+    <input type="text" width="5px" id="searchBar">
+    <button onClick="nameSearch(document.getElementById('searchBar').value)"> Find </button>
+  </div>
+  <div>
+    <table id="food-table">
+        <tr>
+          <th id="business">Business</th>
+          <th id="address">Address</th>
+          <th id="hygiene">Hygiene</th>
+          <th id="date">Date</th>
+          <th id="rating">Rating</th>
+        </tr>
+    </table>
+</div>
+</body>
+</html>
